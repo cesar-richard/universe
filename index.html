@@ -1,0 +1,56 @@
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Websocket</title>
+  </head>
+  <body>
+    <input
+      style="width: 800px;height: 200px"
+      type="text"
+      placeholder="enter text here to send to server"
+      id="eingabe"
+      onkeypress="myFunction(event)"
+    />
+    <button onclick="clearlog()">Clear Logs</button>
+    <div id="uptime"></div>
+    <div style="overflow:scroll;border: solid;" id="display"></div>
+    <script>
+      var sock = new WebSocket("ws://192.168.1.6:3000");
+      var display = document.getElementById("display");
+      var uptime = document.getElementById("uptime");
+
+      sock.onopen = function(event) {
+        setTimeout(function() {
+          sock.send("connection succeeded");
+        }, 1000);
+        display.innerHTML += "connection succeeded <br />";
+      };
+      sock.onmessage = function(event) {
+        const data = JSON.parse(event.data);
+        console.log(data);
+        if (data.event === "heartbeat") {
+          const time = Math.floor(data.time / 1000);
+          uptime.innerHTML =
+            "Uptime : " + Math.floor(time / 60) + "min " + (time % 60) + "s";
+        }
+        display.innerHTML += event.data + "<br />";
+      };
+
+      function myFunction(event) {
+        if (event.keyCode == 13) {
+          var text = document.getElementById("eingabe").value;
+          if (text != "") {
+            sock.send(text);
+            display.innerHTML += "<strong>Me: </strong>" + text + "<br />";
+            document.getElementById("eingabe").value = "";
+          } else {
+            console.log("empty string not sent");
+          }
+        }
+      }
+      function clearlog() {
+        display.innerHTML = "";
+      }
+    </script>
+  </body>
+</html>
