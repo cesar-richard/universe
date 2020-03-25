@@ -23,6 +23,26 @@ s.on("connection", function(ws, req) {
   /******* when server receives messsage from client trigger function with argument message *****/
   ws.on("message", function(message) {
     console.log("Received: " + message);
+    const data = JSON.parse(message);
+    if (
+      data.event === "button" &&
+      data.sensor === "yellow" &&
+      data.state === "on"
+    ) {
+      var unirest = require("unirest");
+      var req = unirest(
+        "PUT",
+        "http://192.168.1.44/api/5y0aIt50T7P01K5LOWQ7uchE8srtK2ZUV7q2QwPG/groups/1/action"
+      )
+        .headers({
+          "Content-Type": "application/json"
+        })
+        .send(JSON.stringify({ scene: "HMo26dDghL9iHal" }))
+        .end(function(res) {
+          if (res.error) throw new Error(res.error);
+          console.log(res.raw_body);
+        });
+    }
     s.clients.forEach(function(client) {
       //broadcast incoming message to all clients (s.clients)
       if (client != ws && client.readyState) {
