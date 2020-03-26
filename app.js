@@ -32,12 +32,50 @@ s.on("connection", function(ws, req) {
       var unirest = require("unirest");
       var req = unirest(
         "PUT",
-        "http://192.168.1.44/api/5y0aIt50T7P01K5LOWQ7uchE8srtK2ZUV7q2QwPG/groups/1/action"
+        "http://192.168.1.44/api/5y0aIt50T7P01K5LOWQ7uchE8srtK2ZUV7q2QwPG/groups/0/action"
       )
         .headers({
           "Content-Type": "application/json"
         })
         .send(JSON.stringify({ scene: "HMo26dDghL9iHal" }))
+        .end(function(res) {
+          if (res.error) throw new Error(res.error);
+          console.log(res.raw_body);
+        });
+    }
+    if (
+      data.event === "button" &&
+      data.sensor === "black" &&
+      data.state === "on"
+    ) {
+      var unirest = require("unirest");
+      var req = unirest(
+        "PUT",
+        "http://192.168.1.44/api/5y0aIt50T7P01K5LOWQ7uchE8srtK2ZUV7q2QwPG/groups/0/action"
+      )
+        .headers({
+          "Content-Type": "application/json"
+        })
+        .send(JSON.stringify({ on: false }))
+        .end(function(res) {
+          if (res.error) throw new Error(res.error);
+          console.log(res.raw_body);
+        });
+    }
+    if (
+      data.event === "button" &&
+      data.sensor === "white" &&
+      data.state === "on"
+    ) {
+      var unirest = require("unirest");
+      var req = unirest(
+        "PUT",
+        "http://192.168.1.44/api/5y0aIt50T7P01K5LOWQ7uchE8srtK2ZUV7q2QwPG/groups/0/action"
+      )
+        .headers({
+          "Content-Type": "application/json"
+        })
+        .send(JSON.stringify({ on: true, bri: 255, xy: [0.3, 0.3] }))
         .end(function(res) {
           if (res.error) throw new Error(res.error);
           console.log(res.raw_body);
