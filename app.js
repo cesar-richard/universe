@@ -1,26 +1,19 @@
-/**************************websocket_example.js*************************************************/
+console.log("Initializing");
+const Group = require("./Hue/Group");
 var bodyParser = require("body-parser");
-const express = require("express"); //express framework to have a higher level of methods
-const app = express(); //assign app variable the express class/method
+const express = require("express");
+const app = express();
 var http = require("http");
 var path = require("path");
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
-const server = http.createServer(app); //create a server
-/**********************websocket setup**************************************************************************************/
-//var expressWs = require('express-ws')(app,server);
+const server = http.createServer(app);
 const WebSocket = require("ws");
 const s = new WebSocket.Server({ server });
-//when browser sends get request, send html file to browser
-// viewed at http://localhost:30000
 app.get("/", function(req, res) {
   res.sendFile(path.join(__dirname + "/index.html"));
 });
-//*************************************************************************************************************************
-//***************************ws chat server********************************************************************************
-//app.ws('/echo', function(ws, req) {
 s.on("connection", function(ws, req) {
-  /******* when server receives messsage from client trigger function with argument message *****/
   ws.on("message", function(message) {
     console.log("Received: " + message);
     const data = JSON.parse(message);
@@ -29,71 +22,58 @@ s.on("connection", function(ws, req) {
       data.sensor === "yellow" &&
       data.state === "on"
     ) {
-      var unirest = require("unirest");
-      var req = unirest(
-        "PUT",
-        "http://192.168.1.44/api/5y0aIt50T7P01K5LOWQ7uchE8srtK2ZUV7q2QwPG/groups/0/action"
-      )
-        .headers({
-          "Content-Type": "application/json"
-        })
-        .send(JSON.stringify({ scene: "HMo26dDghL9iHal" }))
-        .end(function(res) {
-          if (res.error) throw new Error(res.error);
+      Group.action(0, {
+        body: { scene: "HMo26dDghL9iHal" },
+        callback: res => {
           console.log(res.raw_body);
-        });
+        }
+      });
     }
     if (
       data.event === "button" &&
       data.sensor === "black" &&
       data.state === "on"
     ) {
-      var unirest = require("unirest");
-      var req = unirest(
-        "PUT",
-        "http://192.168.1.44/api/5y0aIt50T7P01K5LOWQ7uchE8srtK2ZUV7q2QwPG/groups/0/action"
-      )
-        .headers({
-          "Content-Type": "application/json"
-        })
-        .send(JSON.stringify({ on: false }))
-        .end(function(res) {
-          if (res.error) throw new Error(res.error);
+      Group.action(0, {
+        body: { on: false },
+        callback: res => {
           console.log(res.raw_body);
-        });
+        }
+      });
     }
     if (
       data.event === "button" &&
       data.sensor === "white" &&
       data.state === "on"
     ) {
-      var unirest = require("unirest");
-      var req = unirest(
-        "PUT",
-        "http://192.168.1.44/api/5y0aIt50T7P01K5LOWQ7uchE8srtK2ZUV7q2QwPG/groups/0/action"
-      )
-        .headers({
-          "Content-Type": "application/json"
-        })
-        .send(JSON.stringify({ on: true, bri: 255, xy: [0.3, 0.3] }))
-        .end(function(res) {
-          if (res.error) throw new Error(res.error);
+      Group.action(0, {
+        body: { on: true, bri: 255, xy: [0.3, 0.3] },
+        callback: res => {
           console.log(res.raw_body);
-        });
+        }
+      });
+    }
+    if (
+      data.event === "button" &&
+      data.sensor === "blue" &&
+      data.state === "on"
+    ) {
+      Group.list({
+        callback: res => {
+          console.log(res.raw_body);
+        }
+      });
     }
     s.clients.forEach(function(client) {
-      //broadcast incoming message to all clients (s.clients)
       if (client != ws && client.readyState) {
-        //except to the same client (ws) that sent this message
         client.send(message);
       }
     });
-    // ws.send("From Server only to sender: "+ message); //send to client where message is from
   });
   ws.on("close", function() {
     console.log("lost one client");
   });
-  //ws.send("new client connected");
   console.log("new client connected");
 });
+console.log("Listening");
 server.listen(3000);
