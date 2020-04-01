@@ -20,9 +20,6 @@
       var uptime = document.getElementById("uptime");
 
       sock.onopen = function(event) {
-        setTimeout(function() {
-          sock.send("connection succeeded");
-        }, 1000);
         display.innerHTML += "connection succeeded <br />";
       };
       sock.onmessage = function(event) {
