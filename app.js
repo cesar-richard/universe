@@ -1,5 +1,6 @@
 console.log("Initializing");
 const Group = require("./Hue/Group");
+const Light = require("./Hue/Light");
 var bodyParser = require("body-parser");
 const express = require("express");
 const app = express();
@@ -17,6 +18,13 @@ s.on("connection", function(ws, req) {
   ws.on("message", function(message) {
     console.log("Received: " + message);
     const data = JSON.parse(message);
+    if (data.event === "ask" && data.state === "lights") {
+	console.log("asked lights");
+	Light.list({callback: res => {
+		res = Object.entries(res.body).map(e => {return {"id": e[0],"name":e[1].name, "state":e[1].state};})
+		ws.send(JSON.stringify({"event":"answer","sensor":"lights","state": res}));
+	}});
+    }
     if (
       data.event === "button" &&
       data.sensor === "yellow" &&
@@ -34,6 +42,11 @@ s.on("connection", function(ws, req) {
       data.sensor === "black" &&
       data.state === "on"
     ) {
+      s.clients.forEach(function(client) {
+        if (client != ws && client.readyState) {
+          client.send(JSON.stringify({"action": "relay", "on":false, "relay":1, "macAddress":data.macAddress, "time":data.time, "target": "A4:CF:12:24:56:0C"}));
+     	}
+      });
       Group.action(0, {
         body: { on: false },
         callback: res => {
@@ -62,6 +75,17 @@ s.on("connection", function(ws, req) {
         callback: res => {
           console.log(res.raw_body);
         }
+      });
+    }
+    if (
+      data.event === "button" &&
+      data.sensor === "red" &&
+      data.state === "on"
+    ) {
+      s.clients.forEach(function(client) {
+      	if (client != ws && client.readyState) {
+        	client.send(JSON.stringify({"action": "relay", "on":true, "relay":1, "macAddress":data.macAddress, "time":data.time, "target": "A4:CF:12:24:56:0C"}));
+      	}
       });
     }
     s.clients.forEach(function(client) {
