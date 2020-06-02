@@ -42,17 +42,18 @@ s.on("connection", function(ws, req) {
       data.sensor === "black" &&
       data.state === "on"
     ) {
-      s.clients.forEach(function(client) {
-        if (client != ws && client.readyState) {
-          client.send(JSON.stringify({"action": "relay", "on":false, "relay":1, "macAddress":data.macAddress, "time":data.time, "target": "A4:CF:12:24:56:0C"}));
-     	}
-      });
-      Group.action(0, {
-        body: { on: false },
-        callback: res => {
-          console.log(res.raw_body);
-        }
-      });
+	s.clients.forEach( function each(client) {
+                if (client.readyState === WebSocket.OPEN) {
+      			client.send(JSON.stringify({"action": "relay", "on":false, "relay":1, "macAddress":data.macAddress, "time":data.time, "target": "A4:CF:12:24:56:0C"}));
+      			client.send(JSON.stringify({"action": "relay", "on":false, "relay":2, "macAddress":data.macAddress, "time":data.time, "target": "A4:CF:12:24:56:0C"}));
+      		}
+	});
+	Group.action(0, {
+        	body: { on: false, bri: 0 },
+        	callback: res => {
+         		console.log(res.raw_body);
+        	}
+      	});
     }
     if (
       data.event === "button" &&
@@ -71,6 +72,11 @@ s.on("connection", function(ws, req) {
       data.sensor === "blue" &&
       data.state === "on"
     ) {
+	s.clients.forEach( function each(client) {
+		if (client.readyState === WebSocket.OPEN) {
+			client.send(JSON.stringify({"action": "relay", "on":true, "relay":2, "macAddress":data.macAddress, "time":data.time, "target": "A4:CF:12:24:56:0C"}));
+		}
+	});
       Group.list({
         callback: res => {
           console.log(res.raw_body);
@@ -82,11 +88,11 @@ s.on("connection", function(ws, req) {
       data.sensor === "red" &&
       data.state === "on"
     ) {
-      s.clients.forEach(function(client) {
-      	if (client != ws && client.readyState) {
-        	client.send(JSON.stringify({"action": "relay", "on":true, "relay":1, "macAddress":data.macAddress, "time":data.time, "target": "A4:CF:12:24:56:0C"}));
-      	}
-      });
+	s.clients.forEach( function each(client) {
+                if (client.readyState === WebSocket.OPEN) {
+    			client.send(JSON.stringify({"action": "relay", "on":true, "relay":1, "macAddress":data.macAddress, "time":data.time, "target": "A4:CF:12:24:56:0C"}));
+		}
+	});
     }
     s.clients.forEach(function(client) {
       if (client != ws && client.readyState) {
