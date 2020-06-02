@@ -19,11 +19,17 @@ s.on("connection", function(ws, req) {
     console.log("Received: " + message);
     const data = JSON.parse(message);
     if (data.event === "ask" && data.state === "lights") {
-	console.log("asked lights");
-	Light.list({callback: res => {
-		res = Object.entries(res.body).map(e => {return {"id": e[0],"name":e[1].name, "state":e[1].state};})
-		ws.send(JSON.stringify({"event":"answer","sensor":"lights","state": res}));
-	}});
+      console.log("asked lights");
+      Light.list({
+        callback: res => {
+          res = Object.entries(res.body).map(e => {
+            return { id: e[0], name: e[1].name, state: e[1].state };
+          });
+          ws.send(
+            JSON.stringify({ event: "answer", sensor: "lights", state: res })
+          );
+        }
+      });
     }
     if (
       data.event === "button" &&
@@ -34,6 +40,20 @@ s.on("connection", function(ws, req) {
         body: { scene: "HMo26dDghL9iHal" },
         callback: res => {
           console.log(res.raw_body);
+          Light.list({
+            callback: res => {
+              res = Object.entries(res.body).map(e => {
+                return { id: e[0], name: e[1].name, state: e[1].state };
+              });
+              ws.send(
+                JSON.stringify({
+                  event: "answer",
+                  sensor: "lights",
+                  state: res
+                })
+              );
+            }
+          });
         }
       });
     }
@@ -42,18 +62,50 @@ s.on("connection", function(ws, req) {
       data.sensor === "black" &&
       data.state === "on"
     ) {
-	s.clients.forEach( function each(client) {
-                if (client.readyState === WebSocket.OPEN) {
-      			client.send(JSON.stringify({"action": "relay", "on":false, "relay":1, "macAddress":data.macAddress, "time":data.time, "target": "A4:CF:12:24:56:0C"}));
-      			client.send(JSON.stringify({"action": "relay", "on":false, "relay":2, "macAddress":data.macAddress, "time":data.time, "target": "A4:CF:12:24:56:0C"}));
-      		}
-	});
-	Group.action(0, {
-        	body: { on: false, bri: 0 },
-        	callback: res => {
-         		console.log(res.raw_body);
-        	}
-      	});
+      s.clients.forEach(function each(client) {
+        if (client.readyState === WebSocket.OPEN) {
+          client.send(
+            JSON.stringify({
+              action: "relay",
+              on: false,
+              relay: 1,
+              macAddress: data.macAddress,
+              time: data.time,
+              target: "A4:CF:12:24:56:0C"
+            })
+          );
+          client.send(
+            JSON.stringify({
+              action: "relay",
+              on: false,
+              relay: 2,
+              macAddress: data.macAddress,
+              time: data.time,
+              target: "A4:CF:12:24:56:0C"
+            })
+          );
+        }
+      });
+      Group.action(0, {
+        body: { on: false, bri: 0 },
+        callback: res => {
+          console.log(res.raw_body);
+          Light.list({
+            callback: res => {
+              res = Object.entries(res.body).map(e => {
+                return { id: e[0], name: e[1].name, state: e[1].state };
+              });
+              ws.send(
+                JSON.stringify({
+                  event: "answer",
+                  sensor: "lights",
+                  state: res
+                })
+              );
+            }
+          });
+        }
+      });
     }
     if (
       data.event === "button" &&
@@ -64,6 +116,20 @@ s.on("connection", function(ws, req) {
         body: { on: true, bri: 255, xy: [0.3, 0.3] },
         callback: res => {
           console.log(res.raw_body);
+          Light.list({
+            callback: res => {
+              res = Object.entries(res.body).map(e => {
+                return { id: e[0], name: e[1].name, state: e[1].state };
+              });
+              ws.send(
+                JSON.stringify({
+                  event: "answer",
+                  sensor: "lights",
+                  state: res
+                })
+              );
+            }
+          });
         }
       });
     }
@@ -72,11 +138,20 @@ s.on("connection", function(ws, req) {
       data.sensor === "blue" &&
       data.state === "on"
     ) {
-	s.clients.forEach( function each(client) {
-		if (client.readyState === WebSocket.OPEN) {
-			client.send(JSON.stringify({"action": "relay", "on":true, "relay":2, "macAddress":data.macAddress, "time":data.time, "target": "A4:CF:12:24:56:0C"}));
-		}
-	});
+      s.clients.forEach(function each(client) {
+        if (client.readyState === WebSocket.OPEN) {
+          client.send(
+            JSON.stringify({
+              action: "relay",
+              on: true,
+              relay: 2,
+              macAddress: data.macAddress,
+              time: data.time,
+              target: "A4:CF:12:24:56:0C"
+            })
+          );
+        }
+      });
       Group.list({
         callback: res => {
           console.log(res.raw_body);
@@ -88,11 +163,20 @@ s.on("connection", function(ws, req) {
       data.sensor === "red" &&
       data.state === "on"
     ) {
-	s.clients.forEach( function each(client) {
-                if (client.readyState === WebSocket.OPEN) {
-    			client.send(JSON.stringify({"action": "relay", "on":true, "relay":1, "macAddress":data.macAddress, "time":data.time, "target": "A4:CF:12:24:56:0C"}));
-		}
-	});
+      s.clients.forEach(function each(client) {
+        if (client.readyState === WebSocket.OPEN) {
+          client.send(
+            JSON.stringify({
+              action: "relay",
+              on: true,
+              relay: 1,
+              macAddress: data.macAddress,
+              time: data.time,
+              target: "A4:CF:12:24:56:0C"
+            })
+          );
+        }
+      });
     }
     s.clients.forEach(function(client) {
       if (client != ws && client.readyState) {
