@@ -178,6 +178,7 @@ s.on("connection", function(ws, req) {
         }
       });
     }
+    ws.send(message);
     s.clients.forEach(function(client) {
       if (client != ws && client.readyState) {
         client.send(message);
