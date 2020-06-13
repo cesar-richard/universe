@@ -1,6 +1,4 @@
 console.log("Initializing");
-const Group = require("./Hue/Group");
-const Light = require("./Hue/Light");
 var bodyParser = require("body-parser");
 const express = require("express");
 const app = express();
@@ -18,45 +16,6 @@ s.on("connection", function(ws, req) {
   ws.on("message", function(message) {
     console.log("Received: " + message);
     const data = JSON.parse(message);
-    if (data.event === "ask" && data.state === "lights") {
-      console.log("asked lights");
-      Light.list({
-        callback: res => {
-          res = Object.entries(res.body).map(e => {
-            return { id: e[0], name: e[1].name, state: e[1].state };
-          });
-          ws.send(
-            JSON.stringify({ event: "answer", sensor: "lights", state: res })
-          );
-        }
-      });
-    }
-    if (
-      data.event === "button" &&
-      data.sensor === "yellow" &&
-      data.state === "on"
-    ) {
-      Group.action(0, {
-        body: { scene: "HMo26dDghL9iHal" },
-        callback: res => {
-          console.log(res.raw_body);
-          Light.list({
-            callback: res => {
-              res = Object.entries(res.body).map(e => {
-                return { id: e[0], name: e[1].name, state: e[1].state };
-              });
-              ws.send(
-                JSON.stringify({
-                  event: "answer",
-                  sensor: "lights",
-                  state: res
-                })
-              );
-            }
-          });
-        }
-      });
-    }
     if (
       data.event === "button" &&
       data.sensor === "black" &&
@@ -86,52 +45,6 @@ s.on("connection", function(ws, req) {
           );
         }
       });
-      Group.action(0, {
-        body: { on: false, bri: 0 },
-        callback: res => {
-          console.log(res.raw_body);
-          Light.list({
-            callback: res => {
-              res = Object.entries(res.body).map(e => {
-                return { id: e[0], name: e[1].name, state: e[1].state };
-              });
-              ws.send(
-                JSON.stringify({
-                  event: "answer",
-                  sensor: "lights",
-                  state: res
-                })
-              );
-            }
-          });
-        }
-      });
-    }
-    if (
-      data.event === "button" &&
-      data.sensor === "white" &&
-      data.state === "on"
-    ) {
-      Group.action(0, {
-        body: { on: true, bri: 255, xy: [0.3, 0.3] },
-        callback: res => {
-          console.log(res.raw_body);
-          Light.list({
-            callback: res => {
-              res = Object.entries(res.body).map(e => {
-                return { id: e[0], name: e[1].name, state: e[1].state };
-              });
-              ws.send(
-                JSON.stringify({
-                  event: "answer",
-                  sensor: "lights",
-                  state: res
-                })
-              );
-            }
-          });
-        }
-      });
     }
     if (
       data.event === "button" &&
@@ -150,11 +63,6 @@ s.on("connection", function(ws, req) {
               target: "A4:CF:12:24:56:0C"
             })
           );
-        }
-      });
-      Group.list({
-        callback: res => {
-          console.log(res.raw_body);
         }
       });
     }
@@ -191,4 +99,4 @@ s.on("connection", function(ws, req) {
   console.log("new client connected");
 });
 console.log("Listening");
-server.listen(3000);
+server.listen(3657);
